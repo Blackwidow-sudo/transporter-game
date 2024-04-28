@@ -17,3 +17,9 @@ After that, install the dependencies:
 ```
 pip3 install -r requirements.txt
 ```
+
+## Start game
+
+```
+python3 game
+```
