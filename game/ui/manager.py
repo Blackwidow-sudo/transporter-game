@@ -1,36 +1,22 @@
 import pygame_gui as pgui
 import pygame as pg
 
+from .config import lang_keys
+
 
 ELEMENT_HEIGHT = 50
 ELEMENT_WIDTH = 200
 MENU_PADDING = 50
 
-lang_keys = {
-  'fuel_cap': 'Enter fuel capacity:',
-  'fuel_consum': 'Enter fuel consumption:',
-  'ore_cap': 'Enter ore capacity:',
-  'player_speed': 'Enter player speed:',
-  'enemy_speed': 'Enter enemy speed:',
-  'win_threshold': 'Enter win threshold:',
-}
-
-default_config = {
-  'fuel_cap': 100,
-  'fuel_consum': 10,
-  'ore_cap': 100,
-  'player_speed': 1,
-  'enemy_speed': 1,
-  'win_threshold': 100,
-}
-
 
 class Manager:
   ui_elements = []
 
-  def __init__(self, window, visible, debug=False):
+  def __init__(self, window, visible, config, debug):
     self.window = window
     self.visible = visible
+    self.config = config
+    self.start_pressed = False
     self.manager = pgui.UIManager(window.get_size())
     self.manager.set_visual_debug_mode(debug)
     # Calculate some values that are needed for the UI
@@ -43,7 +29,11 @@ class Manager:
     self.create_elements()
 
   def process_events(self, event):
-    self.manager.process_events(event)
+    if event.type == pgui.UI_BUTTON_PRESSED:
+      if event.ui_element == self.ui_elements[-1]:
+        self.start_pressed = True
+    else:
+      self.manager.process_events(event)
 
   def update(self, dt):
     self.manager.update(dt)
@@ -55,9 +45,13 @@ class Manager:
     bg_rect = pg.Rect(menu_x, menu_y, self.total_fields_width + MENU_PADDING, self.total_fields_height + (MENU_PADDING * 2.5))
     pg.draw.rect(self.window, 'black', bg_rect)
 
-  def draw_ui(self, window):
-    self.draw_menu_bg() if self.visible else None
-    self.manager.draw_ui(window)
+  def draw(self, window):
+    if self.visible:
+      self.draw_menu_bg()
+      self.manager.draw_ui(window)
+
+  def set_config(self, config):
+    self.config = config
 
   def set_ui_visibility(self, visible):
     self.visible = visible
@@ -78,7 +72,7 @@ class Manager:
 
       input_field = pgui.elements.UITextEntryLine(
         relative_rect=pg.Rect((x + ELEMENT_WIDTH, y), (ELEMENT_WIDTH, ELEMENT_HEIGHT)),
-        initial_text=str(default_config[key]),
+        initial_text=str(self.config[key]),
         manager=self.manager
       )
 
@@ -95,9 +89,9 @@ class Manager:
       manager=self.manager
     ))
 
-  def get_values(self):
+  def get_config(self):
     values = {}
-    for i in range(0, len(self.ui_elements), 2):
+    for i in range(0, len(self.ui_elements) - 1, 2):
       key = self.ui_elements[i].text.lower().replace(' ', '_')
       value = self.ui_elements[i + 1].get_text()
       values[key] = int(value)
