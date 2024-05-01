@@ -99,10 +99,6 @@ while is_running:
   # Update configs of entities
   current_config = ui_manager.get_config()
 
-  for entity in entities:
-    if hasattr(entity, 'set_config'):
-      entity.set_config(current_config)
-
   if not paused:
     if not game_over:
       for entitiy in entities:
@@ -129,6 +125,8 @@ while is_running:
   if ui_manager.start_pressed:
     for entity in entities:
       entity.reset()
+      if hasattr(entity, 'set_config'):
+        entity.set_config(current_config)
     paused = game_over = won = False
     ui_manager.start_pressed = False
 
