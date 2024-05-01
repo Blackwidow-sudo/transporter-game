@@ -28,7 +28,7 @@ python3 game
 
 The truck has the usual WASD controls.
 
-Move to the ore to load some ore and then deliver it to the factory.
+Move to the ore node to load some ore and then deliver it to the factory.
 
 If you hit the configured win threshold (percentage of the amount in the ore node), you win.
 
