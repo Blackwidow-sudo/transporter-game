@@ -1,4 +1,5 @@
 import pygame as pg
+
 from os import path
 
 from ui import Manager as UIManager, default_config
@@ -11,27 +12,37 @@ SCREEN_HEIGHT = 720
 ASSET_PATH = path.join(path.dirname(__file__), 'assets')
 
 
-def init_game():
-  pass
+def is_winnable(available_ore, collected_ore, win_amount):
+  return available_ore + collected_ore >= win_amount
+
+def draw_game_over(window, won):
+  font_height = 100
+  font = pg.font.Font(None, font_height)
+  text = font.render('You won!' if won else 'Game Over!', True, (0, 0, 0))
+  text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, font_height))
+  window.blit(text, text_rect)
 
 
+# Initialize pygame
 pg.init()
 pg.font.init()
-
 pg.display.set_caption('Transporter Game')
 
+# Initialize game state
 paused = True
 game_over = False
 is_running = True
 won = False
 
+# Initialize game window
 window = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 ui_manager = UIManager(window, paused, default_config, DEBUG)
 clock = pg.time.Clock()
 
+
+# Initialize entity configurations
 player_config = {
   'speed': default_config['player_speed'],
-  'fuel_capacity': default_config['fuel_capacity'],
   'fuel_consumption': default_config['fuel_consumption'],
   'ore_capacity': default_config['ore_capacity']
 }
@@ -40,6 +51,7 @@ enemy_config = {
   'speed': default_config['enemy_speed']
 }
 
+# Instantiate entities
 player = Player(
   x=SCREEN_WIDTH // 2,
   y=SCREEN_HEIGHT // 2,
@@ -51,7 +63,7 @@ ore = Ore(
   x=SCREEN_WIDTH - 150,
   y=SCREEN_HEIGHT // 2,
   img_path=path.join(ASSET_PATH, 'ore.png'),
-  capacity=default_config['ore_amount'],
+  amount=default_config['ore_amount'],
   scale=0.3
 )
 factory = Factory(
@@ -70,8 +82,10 @@ gas_station = GasStation(
 )
 enemy = Enemy(x=0, y=0, img_path=path.join(ASSET_PATH, 'helicopter.png'), scale=0.5, config=enemy_config)
 
-entities = [player, enemy, ore, factory, gas_station]
+# The order of entities is important for drawing
+entities = [ore, factory, gas_station, player, enemy]
 
+# Game loop
 while is_running:
   dt = clock.tick(60) / 1000.0
 
@@ -90,42 +104,53 @@ while is_running:
   player.set_config(ui_manager.get_config())
   enemy.set_config(ui_manager.get_config())
 
-  if not paused and not game_over:
-    for entitiy in entities:
-      entitiy.visible = True
+  if not paused:
+    if not game_over:
+      for entitiy in entities:
+        entitiy.toggle_visibility(True)
     player.update(dt)
     enemy.update(player)
     
     # Check entity collisions
-    if player.check_collision(enemy) or player.no_fuel():
-      game_over = True
-      paused = True
+    if player.check_collision(enemy):
+      stolen_ore = player.loaded_ore
+      player.loaded_ore = 0
+      if stolen_ore > 0:
+        enemy.reset()
     if player.check_collision(ore) and not player.loaded_ore:
-      ore.capacity -= player.ore_capacity
+      ore.amount -= player.ore_capacity
       player.loaded_ore += player.ore_capacity
     if player.check_collision(factory):
       factory.ore += player.loaded_ore
       player.loaded_ore = 0
+      game_over = won = factory.get_progress() >= 100
     if player.check_collision(gas_station):
-      player.fuel_capacity = 100
+      player.fuel_amount = 100
   
   if ui_manager.start_pressed:
     for entity in entities:
       entity.reset()
-    paused = False
-    game_over = False
+    paused = game_over = won = False
     ui_manager.start_pressed = False
+
+  # Game over when player has no fuel or he cant win anymore
+  can_win = is_winnable(ore.amount, factory.ore + player.loaded_ore, factory.get_required_win_amount())
+  game_over = player.no_fuel() or won or not can_win
+
+  paused = paused or game_over
 
   ui_manager.update(dt)
 
+  # Draw everything
   window.fill('white')
 
-  ore.draw(window)
-  factory.draw(window)
-  gas_station.draw(window)
-  player.draw(window)
-  enemy.draw(window)
+  for entity in entities:
+    entity.draw(window)
+
   ui_manager.draw(window)
+
+  if game_over:
+    draw_game_over(window, won)
 
   pg.display.flip()
 

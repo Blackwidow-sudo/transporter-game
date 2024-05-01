@@ -8,6 +8,7 @@ class Player(Vehicle):
 
   def __init__(self, x, y, img_path, scale, config, visible = False):
     super().__init__(x, y, img_path, scale, config, visible)
+    self.fuel_amount = 100
 
   def check_collision(self, other):
     if self.rect.colliderect(other.rect):
@@ -15,17 +16,16 @@ class Player(Vehicle):
     return False
   
   def no_fuel(self):
-    return self.fuel_capacity <= 0
+    return self.fuel_amount <= 0
   
   def set_config(self, config):
     self.fuel_consumption = config['fuel_consumption'] if 'fuel_consumption' in config else self.fuel_consumption
     self.ore_capacity = config['ore_capacity'] if 'ore_capacity' in config else self.ore_capacity
-    self.fuel_capacity = config['fuel_capacity'] if 'fuel_capacity' in config else self.fuel_capacity
   
   def draw_fuel_bar(self, window):
     fuel_bar_width = self.rect.width
     fuel_bar_height = 20
-    fill = (self.fuel_capacity / 100) * fuel_bar_width
+    fill = (self.fuel_amount / 100) * fuel_bar_width
     outline_rect = pg.Rect(self.x, self.y - fuel_bar_height - 10, fuel_bar_width, fuel_bar_height)
     fill_rect = pg.Rect(self.x, self.y - fuel_bar_height - 10, fill, fuel_bar_height)
     pg.draw.rect(window, (255, 0, 0), fill_rect)
@@ -47,7 +47,7 @@ class Player(Vehicle):
     boundaries = pg.display.get_surface().get_rect()
 
     if any([keys[pg.K_LEFT], keys[pg.K_RIGHT], keys[pg.K_UP], keys[pg.K_DOWN], keys[pg.K_a], keys[pg.K_d], keys[pg.K_w], keys[pg.K_s]]):
-      self.fuel_capacity = max(0, self.fuel_capacity - self.fuel_consumption * dt)
+      self.fuel_amount = max(0, self.fuel_amount - self.fuel_consumption * dt)
 
     if keys[pg.K_LEFT] or keys[pg.K_a]:
       self.x = max(0, self.x - self.speed)
@@ -62,5 +62,5 @@ class Player(Vehicle):
 
   def reset(self):
     super().reset()
-    self.fuel_capacity = 100
+    self.fuel_amount = 100
     self.loaded_ore = 0

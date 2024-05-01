@@ -20,6 +20,9 @@ class Vehicle:
     if self.visible:
       window.blit(self.image, (self.x, self.y))
 
+  def toggle_visibility(self, visible = None):
+    self.visible = not self.visible if visible is None else visible
+
   def reset(self):
     self.x, self.y = self.start_position
     self.rect.topleft = (self.x, self.y)
