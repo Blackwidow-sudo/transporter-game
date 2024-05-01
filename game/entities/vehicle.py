@@ -1,7 +1,7 @@
 import pygame as pg
 
 class Vehicle:
-  def __init__(self, x, y, img_path, scale, config, visible):
+  def __init__(self, x, y, img_path, scale, visible):
     img = pg.image.load(img_path)
     width, height = img.get_size()
     self.image = pg.transform.smoothscale(img, (int(width * scale), int(height * scale)))
@@ -10,11 +10,6 @@ class Vehicle:
     self.y = y
     self.visible = visible
     self.start_position = (x, y)
-    for key in config:
-      setattr(self, key, config[key])
-
-  def set_config(self, config):
-    self.speed = config['speed'] if 'speed' in config else self.speed
 
   def draw(self, window):
     if self.visible:

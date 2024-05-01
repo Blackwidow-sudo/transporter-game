@@ -7,8 +7,9 @@ class Player(Vehicle):
   loaded_ore = 0
 
   def __init__(self, x, y, img_path, scale, config, visible = False):
-    super().__init__(x, y, img_path, scale, config, visible)
+    super().__init__(x, y, img_path, scale, visible)
     self.fuel_amount = 100
+    self.set_config(config)
 
   def check_collision(self, other):
     if self.rect.colliderect(other.rect):
@@ -19,6 +20,7 @@ class Player(Vehicle):
     return self.fuel_amount <= 0
   
   def set_config(self, config):
+    self.speed = config['player_speed'] if 'player_speed' in config else self.speed
     self.fuel_consumption = config['fuel_consumption'] if 'fuel_consumption' in config else self.fuel_consumption
     self.ore_capacity = config['ore_capacity'] if 'ore_capacity' in config else self.ore_capacity
   

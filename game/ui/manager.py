@@ -92,7 +92,8 @@ class Manager:
   def get_config(self):
     values = {}
     for i in range(0, len(self.ui_elements) - 1, 2):
-      key = self.ui_elements[i].text.lower().replace(' ', '_')
-      value = self.ui_elements[i + 1].get_text()
-      values[key] = int(value)
+      for key, value in lang_keys.items():
+        if self.ui_elements[i].text == value:
+          field_value = self.ui_elements[i + 1].get_text()
+          values[key] = int(field_value) if field_value else 0
     return values

@@ -13,9 +13,12 @@ ASSET_PATH = path.join(path.dirname(__file__), 'assets')
 
 
 def is_winnable(available_ore, collected_ore, win_amount):
+  """Check if the player can still win the game."""
   return available_ore + collected_ore >= win_amount
 
+
 def draw_game_over(window, won):
+  """Draw the game over screen."""
   font_height = 100
   font = pg.font.Font(None, font_height)
   text = font.render('You won!' if won else 'Game Over!', True, (0, 0, 0))
@@ -39,40 +42,27 @@ window = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 ui_manager = UIManager(window, paused, default_config, DEBUG)
 clock = pg.time.Clock()
 
-
-# Initialize entity configurations
-player_config = {
-  'speed': default_config['player_speed'],
-  'fuel_consumption': default_config['fuel_consumption'],
-  'ore_capacity': default_config['ore_capacity']
-}
-
-enemy_config = {
-  'speed': default_config['enemy_speed']
-}
-
 # Instantiate entities
 player = Player(
   x=SCREEN_WIDTH // 2,
   y=SCREEN_HEIGHT // 2,
   img_path=path.join(ASSET_PATH, 'truck.png'),
   scale=0.3,
-  config=player_config
+  config=default_config
 )
 ore = Ore(
   x=SCREEN_WIDTH - 150,
   y=SCREEN_HEIGHT // 2,
   img_path=path.join(ASSET_PATH, 'ore.png'),
-  amount=default_config['ore_amount'],
-  scale=0.3
+  scale=0.3,
+  config=default_config
 )
 factory = Factory(
   x=0,
   y=SCREEN_HEIGHT // 2,
   img_path=path.join(ASSET_PATH, 'factory.png'),
   scale=0.3,
-  win_threshold=default_config['win_threshold'],
-  ore_amount=default_config['ore_amount']
+  config=default_config
 )
 gas_station = GasStation(
   x=SCREEN_WIDTH // 2,
@@ -80,7 +70,13 @@ gas_station = GasStation(
   img_path=path.join(ASSET_PATH, 'gas_station.png'),
   scale=0.2
 )
-enemy = Enemy(x=0, y=0, img_path=path.join(ASSET_PATH, 'helicopter.png'), scale=0.5, config=enemy_config)
+enemy = Enemy(
+  x=0,
+  y=0,
+  img_path=path.join(ASSET_PATH, 'helicopter.png'),
+  scale=0.5,
+  config=default_config
+)
 
 # The order of entities is important for drawing
 entities = [ore, factory, gas_station, player, enemy]
@@ -101,8 +97,11 @@ while is_running:
   ui_manager.set_ui_visibility(paused)
 
   # Update configs of entities
-  player.set_config(ui_manager.get_config())
-  enemy.set_config(ui_manager.get_config())
+  current_config = ui_manager.get_config()
+
+  for entity in entities:
+    if hasattr(entity, 'set_config'):
+      entity.set_config(current_config)
 
   if not paused:
     if not game_over:

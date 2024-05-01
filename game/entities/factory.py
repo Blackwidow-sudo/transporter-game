@@ -4,11 +4,14 @@ from .place import Place
 
 
 class Factory(Place):
-  def __init__(self, x, y, img_path, scale, win_threshold, ore_amount, visible = False):
+  def __init__(self, x, y, img_path, scale, config, visible = False):
     super().__init__(x, y, img_path, scale, visible)
-    self.win_threshold = win_threshold
-    self.ore_amount = ore_amount
+    self.set_config(config)
     self.ore = 0
+
+  def set_config(self, config):
+    self.win_threshold = config['win_threshold'] if 'win_threshold' in config else self.win_threshold
+    self.ore_amount = config['ore_amount'] if 'ore_amount' in config else self.ore_amount
 
   def draw(self, window):
     if self.visible:
@@ -26,9 +29,11 @@ class Factory(Place):
     pg.draw.rect(window, (0, 0, 0), outline_rect, 2)
   
   def get_progress(self):
+    """Return the progress of the game in percentage."""
     return (self.ore / self.get_required_win_amount()) * 100
   
   def get_required_win_amount(self):
+    """Return the amount of ore required to win the game."""
     return (self.win_threshold * self.ore_amount) / 100
 
   def reset(self):
