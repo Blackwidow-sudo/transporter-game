@@ -44,35 +44,30 @@ clock = pg.time.Clock()
 
 # Instantiate entities
 player = Player(
-  x=SCREEN_WIDTH // 2,
-  y=SCREEN_HEIGHT // 2,
+  position=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),
   img_path=path.join(ASSET_PATH, 'truck.png'),
   scale=0.3,
   config=default_config
 )
 ore = Ore(
-  x=SCREEN_WIDTH - 150,
-  y=SCREEN_HEIGHT // 2,
+  position=(SCREEN_WIDTH - 150, SCREEN_HEIGHT // 2),
   img_path=path.join(ASSET_PATH, 'ore.png'),
   scale=0.3,
   config=default_config
 )
 factory = Factory(
-  x=0,
-  y=SCREEN_HEIGHT // 2,
+  position=(0, SCREEN_HEIGHT // 2),
   img_path=path.join(ASSET_PATH, 'factory.png'),
   scale=0.3,
   config=default_config
 )
 gas_station = GasStation(
-  x=SCREEN_WIDTH // 2,
-  y=SCREEN_HEIGHT - 100,
+  position=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 100),
   img_path=path.join(ASSET_PATH, 'gas_station.png'),
   scale=0.2
 )
 enemy = Enemy(
-  x=0,
-  y=0,
+  position=(0, 0),
   img_path=path.join(ASSET_PATH, 'helicopter.png'),
   scale=0.5,
   config=default_config
@@ -107,7 +102,7 @@ while is_running:
     enemy.update(player)
     
     # Check entity collisions
-    if player.check_collision(enemy):
+    if player.check_collision(enemy) and not player.check_collision(ore):
       stolen_ore = player.loaded_ore
       player.loaded_ore = 0
       if stolen_ore > 0:
@@ -122,6 +117,7 @@ while is_running:
     if player.check_collision(gas_station):
       player.fuel_amount = 100
   
+  # New start of new game
   if ui_manager.start_pressed:
     for entity in entities:
       entity.reset()
