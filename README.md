@@ -26,13 +26,13 @@ python3 game
 
 ## Manual
 
-The truck has the usual WASD controls.
+The truck has the usual WASD controls, but you can also move with the arrow keys.
 
 Move to the ore node to load some ore and then deliver it to the factory.
 
 If you hit the configured win threshold (percentage of the amount in the ore node), you win.
 
-If the helicopter steals too much ore from your truck, so that you cant complete the win threshold, the game is over.
+If the helicopter steals too much ore from your truck, so that you cant complete the win threshold, the game is over. You will also lose when you don't have any fuel left.
 
 You can pause the game at any time by pressing the Escape key.
 
