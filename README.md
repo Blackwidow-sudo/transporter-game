@@ -2,7 +2,7 @@
 
 ## Install
 
-Clone the repository, then create a virtual environment and activate it:
+First, create a virtual environment and activate it:
 
 ```
 python3 -m venv .venv
